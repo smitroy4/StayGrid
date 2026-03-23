@@ -19,14 +19,14 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne      //Room owns the relationship
     @JoinColumn(name="hotel_id",nullable = false)
     private Hotel hotel;
 
     @Column(nullable = false)
     private String type;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 10, scale = 2)        //number can be 10 digits long and have 2 digits after decimal
     private BigDecimal basePrice;
 
     @Column(columnDefinition = "TEXT[]")
