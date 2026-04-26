@@ -9,7 +9,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Engineering Highlights](#engineering-highlights)
+- [Development Highlights](#development-highlights)
 - [Tech Stack](#tech-stack)
 - [API Reference](#api-reference)
 - [Testing](#testing)
