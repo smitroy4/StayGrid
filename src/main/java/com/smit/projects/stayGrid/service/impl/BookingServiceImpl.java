@@ -2,13 +2,11 @@ package com.smit.projects.stayGrid.service.impl;
 
 import com.smit.projects.stayGrid.dto.BookingDto;
 import com.smit.projects.stayGrid.dto.BookingRequest;
+import com.smit.projects.stayGrid.dto.GuestDto;
 import com.smit.projects.stayGrid.entity.*;
 import com.smit.projects.stayGrid.entity.enums.BookingStatus;
 import com.smit.projects.stayGrid.exception.ResourceNotFoundException;
-import com.smit.projects.stayGrid.repository.BookingRepository;
-import com.smit.projects.stayGrid.repository.HotelRepository;
-import com.smit.projects.stayGrid.repository.InventoryRepository;
-import com.smit.projects.stayGrid.repository.RoomRepository;
+import com.smit.projects.stayGrid.repository.*;
 import com.smit.projects.stayGrid.service.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -30,6 +29,7 @@ public class BookingServiceImpl implements BookingService {
     private final RoomRepository roomRepository;
     private final InventoryRepository inventoryRepository;
     private final ModelMapper modelMapper;
+    private final GuestRepository guestRepository;
 
     @Override
     @Transactional
@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
                 .room(room)
                 .checkInDate(bookingRequest.getCheckInDate())
                 .checkOutDate(bookingRequest.getCheckOutDate())
-                .user(user)
+                .user(getCurrentUser())
                 .roomsCount(bookingRequest.getRoomsCount())
                 .amount(BigDecimal.TEN)
                 .build();
@@ -96,4 +96,49 @@ public class BookingServiceImpl implements BookingService {
         return modelMapper.map(booking, BookingDto.class);
 
     }
+
+//    created the addGuest service
+
+    @Override
+    @Transactional
+    public BookingDto addGuests(Long bookingId, List<GuestDto> guestDtoList) {
+
+        log.info("Add guests for booking with id - {}", bookingId);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Booking not found with id: "+bookingId));
+
+        if(hasBookingExpired(booking)){
+            throw new IllegalStateException("Booking has already expired");
+        }
+
+        if(booking.getBookingStatus() != BookingStatus.RESERVED){
+            throw new IllegalStateException(("Booking is not under reserved state, cannot add guests"));
+        }
+
+        for(GuestDto guestDto : guestDtoList){
+            Guest guest = modelMapper.map(guestDto, Guest.class);
+            guest.setUser(getCurrentUser());
+            guest = guestRepository.save(guest);
+            booking.getGuests().add(guest);
+
+        }
+
+        booking.setBookingStatus(BookingStatus.GUESTS_ADDED);
+        booking = bookingRepository.save(booking);
+        return modelMapper.map(booking, BookingDto.class);
+    }
+
+    public boolean hasBookingExpired(Booking booking){
+        return booking.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now());
+    }
+
+    public User getCurrentUser(){
+        User user = new User();
+        user.setId(1L); //TODO: REMOVE DUMMY USER
+        return user;
+    }
+
+
 }
