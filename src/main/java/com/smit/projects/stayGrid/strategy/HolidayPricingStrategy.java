@@ -1,0 +1,29 @@
+package com.smit.projects.stayGrid.strategy;
+
+import com.smit.projects.stayGrid.entity.Inventory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+
+@Service
+@RequiredArgsConstructor
+public class HolidayPricingStrategy implements PricingStrategy{
+
+    private final PricingStrategy wrapper;
+
+    @Override
+    public BigDecimal calculatePrice(Inventory inventory) {
+
+        BigDecimal price = wrapper.calculatePrice(inventory);
+
+        //NOTE: call an API or check with local date
+        boolean isTodayHoliday = true;
+
+        if(isTodayHoliday){
+            price = price.multiply(BigDecimal.valueOf(1.25));
+        }
+
+        return price;
+    }
+}
