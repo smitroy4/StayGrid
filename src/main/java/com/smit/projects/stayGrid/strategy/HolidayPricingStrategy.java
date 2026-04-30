@@ -10,12 +10,12 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class HolidayPricingStrategy implements PricingStrategy{
 
-    private final PricingStrategy wrapper;
+    private final PricingStrategy wrapped;
 
     @Override
     public BigDecimal calculatePrice(Inventory inventory) {
 
-        BigDecimal price = wrapper.calculatePrice(inventory);
+        BigDecimal price = wrapped.calculatePrice(inventory);
 
         //NOTE: call an API or check with local date
         boolean isTodayHoliday = true;
