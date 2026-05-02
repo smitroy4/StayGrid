@@ -2,6 +2,7 @@ package com.smit.projects.stayGrid.controller;
 
 import com.smit.projects.stayGrid.dto.HotelDto;
 import com.smit.projects.stayGrid.dto.HotelInfoDto;
+import com.smit.projects.stayGrid.dto.HotelPriceDto;
 import com.smit.projects.stayGrid.dto.HotelSearchRequest;
 import com.smit.projects.stayGrid.service.HotelService;
 import com.smit.projects.stayGrid.service.InventoryService;
@@ -21,8 +22,8 @@ public class HotelBrowseController {
     private final HotelService hotelService;
 
     @GetMapping("/search")
-    public ResponseEntity<Page<HotelDto>> searchHotels(@RequestBody HotelSearchRequest hotelSearchRequest){
-        Page<HotelDto> page = inventoryService.searchHotels(hotelSearchRequest);
+    public ResponseEntity<Page<HotelPriceDto>> searchHotels(@RequestBody HotelSearchRequest hotelSearchRequest){
+        var page = inventoryService.searchHotels(hotelSearchRequest);
         return ResponseEntity.ok(page);
     }
 

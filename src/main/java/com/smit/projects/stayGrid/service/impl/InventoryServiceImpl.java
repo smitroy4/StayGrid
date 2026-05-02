@@ -1,10 +1,12 @@
 package com.smit.projects.stayGrid.service.impl;
 
 import com.smit.projects.stayGrid.dto.HotelDto;
+import com.smit.projects.stayGrid.dto.HotelPriceDto;
 import com.smit.projects.stayGrid.dto.HotelSearchRequest;
 import com.smit.projects.stayGrid.entity.Hotel;
 import com.smit.projects.stayGrid.entity.Inventory;
 import com.smit.projects.stayGrid.entity.Room;
+import com.smit.projects.stayGrid.repository.HotelMinPriceRepository;
 import com.smit.projects.stayGrid.repository.InventoryRepository;
 import com.smit.projects.stayGrid.service.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final ModelMapper modelMapper;
     private final InventoryRepository inventoryRepository;
+    private final HotelMinPriceRepository hotelMinPriceRepository;
 
     @Override
     public void initializeRoomForAYear(Room room) {
@@ -36,6 +39,7 @@ public class InventoryServiceImpl implements InventoryService {
                     .hotel(room.getHotel())
                     .room(room)
                     .bookedCount(0)
+                    .reservedCount(0)
                     .city(room.getHotel().getCity())
                     .date(today)
                     .price(room.getBasePrice())
@@ -55,7 +59,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
+    public Page<HotelPriceDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
 
         log.info("Searching Hotels for {} city, from {} to {}",
                 hotelSearchRequest.getCity(),
@@ -69,13 +73,14 @@ public class InventoryServiceImpl implements InventoryService {
                 hotelSearchRequest.getStartDate(),
                 hotelSearchRequest.getEndDate()) +1;
 
-        Page<Hotel> hotelPage =  inventoryRepository.findHotelsWithAvailableInventory(
+//      TODO: Business Logic - 90 Days
+        Page<HotelPriceDto> hotelPage =  hotelMinPriceRepository.findHotelsWithAvailableInventory(
                 hotelSearchRequest.getCity(),
                 hotelSearchRequest.getStartDate(),
                 hotelSearchRequest.getEndDate(),
                 hotelSearchRequest.getRoomsCount(),
                 dateCount, pageable);
 
-        return hotelPage.map((element) -> modelMapper.map(element,HotelDto.class));
+        return hotelPage;
     }
 }
